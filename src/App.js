@@ -8,6 +8,7 @@ const App = () => {
     <SocketContext.Provider value = {socket}>
       <BrowserRouter>
         <Routes>
+          <Route exact path="/" element={<LoginPage/>} />
           <Route exact path="/login" element={<LoginPage/>} />
           <Route exact path="/register" element={<RegisterPage/>} />
         </Routes>
