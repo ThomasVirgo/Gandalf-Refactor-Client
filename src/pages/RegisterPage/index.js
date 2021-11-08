@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom'
-import { requestRegister } from "../../requests";
+import { Link, useNavigate } from 'react-router-dom'
+import { requestRegister, requestLogin } from "../../requests";
 
 const RegisterPage = () => {
     const [userData, setUserData] = useState({
@@ -12,10 +12,14 @@ const RegisterPage = () => {
         "confirm_password":""
     })
 
+    const [error, setError] = useState(false)
+    const navigate = useNavigate()
+
     function handleChange (event){
         let newData = {...userData}
         newData[event.target.name] = event.target.value
         setUserData(newData)
+        setError(false)
     }
 
     async function handleSubmit (event){
@@ -34,11 +38,23 @@ const RegisterPage = () => {
             "last_name": userData.last_name,
             "email": userData.email,
             "username": userData.email,
+            "game_name": userData.username,
             "password": userData.password,
             "password_confirmation": userData.confirm_password
         }
-        let response = await requestRegister(data)
-        console.log(response);
+        let [success, response] = await requestRegister(data)
+        if (success){
+            console.log(response);
+            let [successLogin, loginResponse] = await requestLogin({
+                "username": userData.email,
+                "password": userData.password
+            })
+            localStorage.setItem('email', userData.email)
+            localStorage.setItem('token', loginResponse.token )
+            navigate('/dashboard'); 
+        } else {
+            setError(true); 
+        }
     }
     return (
         <div>
@@ -53,6 +69,7 @@ const RegisterPage = () => {
                 <input type="submit" value='Register' />
             </form>
             <p>Already have an account? <Link to='/login'>Login here</Link></p>
+            {error && <p>Registration was unsuccessful, please try again</p>}
         </div>
     )
 }
